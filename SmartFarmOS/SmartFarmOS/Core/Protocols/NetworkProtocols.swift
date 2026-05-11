@@ -6,33 +6,21 @@
 //
 
 import Foundation
-import SwiftData
 
-/// Типы поддерживаемых фермерских устройств
-public enum DeviceType: String, Codable, CaseIterable, Sendable {
-    case brooder = "brooder"
-    case beehive = "beehive"
-    case calfHouse = "calf_house"
-    case enclosure = "enclosure"
-    case unknown = "unknown"
-}
-
-/// Базовый протокол для любого фермерского устройства
-public protocol FarmDevice: Identifiable, Equatable, Sendable {
-    var id: UUID { get }
-    var name: String { get set }
-    var type: DeviceType { get }
-    var ipAddress: String { get set }
-    var port: Int { get set }
-    var isConnected: Bool { get set }
-    var lastUpdated: Date { get set }
+/// Протокол для парсинга JSON-состояний устройств
+public protocol DeviceParser: Sendable {
+    associatedtype Output: Decodable
+    func parse(data: Data) -> Output?
 }
 
 /// Протокол реестра парсеров JSON-состояний
-public protocol ParserRegistry {
+public protocol ParserRegistry: Sendable {
     func canParse(deviceType: DeviceType) -> Bool
-    func parse(json: Data) -> (any FarmDevice)?
+    func parse(json: Data, for deviceType: DeviceType) -> (any FarmDevice)?
 }
 
-// ⚠️ Предполагается, что DeviceEntity уже определён в проекте как @Model
-// @Model final class DeviceEntity: Identifiable { ... }
+/// Протокол сетевого сервиса с обработкой ошибок
+public protocol NetworkServiceProtocol: Sendable {
+    func decode<T: Decodable>(_ type: T.Type, from data: Data, fallback: T?) -> T
+    func fetchWithRetry<T: Decodable>(url: URL, maxRetries: Int, fallback: T?) async -> T
+}

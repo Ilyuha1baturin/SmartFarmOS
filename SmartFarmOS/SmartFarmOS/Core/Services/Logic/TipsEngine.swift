@@ -119,20 +119,29 @@ public final class TipsEngine {
     
     /// Ближайший профиль ≤ текущего дня
     public func profileValue(for breed: Breed, ageDays: Int) -> DayProfile? {
+        guard ageDays >= 1 else { return nil }
         let prof = profile(for: breed)
         let valid = prof.filter { $0.day <= ageDays }
-        return valid.max { $0.day < $1.day } ?? prof.first
+        return valid.max(by: { $0.day < $1.day }) ?? prof.first
     }
     
     /// Линейная интерполяция температуры (как в C++)
     public func interpolateTemp(for breed: Breed, ageDays: Int) -> Double {
         let prof = profile(for: breed)
+        guard !prof.isEmpty else { return 25.0 } // Значение по умолчанию
+        
         if ageDays <= prof[0].day { return prof[0].targetTemp }
         if ageDays >= prof.last!.day { return prof.last!.targetTemp }
+        
         for i in 0..<prof.count-1 {
             if ageDays >= prof[i].day && ageDays < prof[i+1].day {
-                let d1 = Double(prof[i].day), d2 = Double(prof[i+1].day)
-                return prof[i].targetTemp + (prof[i+1].targetTemp - prof[i].targetTemp) * (Double(ageDays) - d1) / (d2 - d1)
+                let d1 = Double(prof[i].day)
+                let d2 = Double(prof[i+1].day)
+                let t1 = prof[i].targetTemp
+                let t2 = prof[i+1].targetTemp
+                // Защита от деления на ноль
+                guard d2 != d1 else { return t1 }
+                return t1 + (t2 - t1) * (Double(ageDays) - d1) / (d2 - d1)
             }
         }
         return prof.last!.targetTemp

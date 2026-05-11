@@ -53,7 +53,7 @@ public final class AlarmEngine {
         let age = max(1, device.ageDays)
         
         // Формула мин. температуры из main.cpp: max(15.0, 20.0 - max(0, age-21)*0.3)
-        let minTempAlarm = max(15.0, 20.0 - max(0, Double(age - 21)) * 0.3)
+        let minTempAlarm = max(15.0, 20.0 - max(0.0, Double(age - 21)) * 0.3)
         
         // Температурные пороги
         if !temp.isNaN && temp >= 38.0 {
@@ -63,7 +63,7 @@ public final class AlarmEngine {
         } else if !temp.isNaN && temp <= minTempAlarm {
             alarms.append(AlarmEvent(timestamp: now, deviceId: device.id,
                                    condition: .temp_low, severity: .warning,
-                                   message: "Температура ниже возрастной нормы"))
+                                   message: "Температура ниже возрастной нормы (порог: \(String(format: "%.1f", minTempAlarm))°C)"))
         }
         
         // Аппаратные датчики
@@ -82,12 +82,12 @@ public final class AlarmEngine {
         if co2 > 1500 {
             alarms.append(AlarmEvent(timestamp: now, deviceId: device.id,
                                    condition: .co2_high, severity: .warning,
-                                   message: "CO₂ > 1500 ppm"))
+                                   message: "CO₂ > 1500 ppm (текущее: \(co2) ppm)"))
         }
         if nh3 > 500 {
             alarms.append(AlarmEvent(timestamp: now, deviceId: device.id,
                                    condition: .nh3_high, severity: .critical,
-                                   message: "Аммиак > 500 ppm"))
+                                   message: "Аммиак > 500 ppm (текущее: \(nh3) ppm)"))
         }
         
         // DSP-паника и неисправности

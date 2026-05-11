@@ -1,0 +1,31 @@
+```
+# Xcode
+*.xcodeproj/
+*.xcworkspace/
+*.xcuserstate
+project.xcworkspace/xcshareddata/xcschemes_*
+
+# Build
+build/
+DerivedData/
+
+# Swift Package Manager
+.swiftpm/
+
+# Temporary files
+*.tmp
+*.log
+
+# Environment
+.env
+.env.local
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+```
